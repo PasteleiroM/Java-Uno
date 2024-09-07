@@ -20,7 +20,7 @@ public class BaralhoBuilder {
        }
        for (String especial : especiais) {
            for (int i = 0; i < 4; i++) {
-               baralho.add(new Cartas("", especial)); // especial não tem cor
+               baralho.add(new Cartas("", especial)); // especiala não tem cor
            }
        }
        return baralho;

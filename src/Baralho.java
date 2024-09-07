@@ -12,7 +12,7 @@ public class Baralho {
 
 
 
-    private void embaralha() {
+    public void embaralha() {
         Collections.shuffle(baralho);
     }
 
@@ -20,7 +20,7 @@ public class Baralho {
         return baralho;
     }
 
-    public Cartas entregador() {
+    public Cartas entregador() { //serve para comnprar cartaas novas também no meio do jogo
         return baralho.remove(0);
     }
 
