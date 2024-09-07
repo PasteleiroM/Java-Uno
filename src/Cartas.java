@@ -13,7 +13,7 @@ public class Cartas {
     }
 
     public String toString() {
-        return color + " " + value;
+        return color + " " + value; //a
     }
     public String getValue() {
         return value;

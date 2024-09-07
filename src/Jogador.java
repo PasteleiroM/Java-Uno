@@ -12,7 +12,7 @@ public class Jogador {
     }
 
     private String nome;
-    //private Boolean jogadorIA;
+    //private Boolean jogadorIAa;
 
     public void setNome(String nome) {
         this.nome = nome;

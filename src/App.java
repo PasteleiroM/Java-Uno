@@ -14,7 +14,7 @@ public class App {
        // jogador2.mostrarMao();
 
         //System.out.println("Baralho");
-        //for (Cartas carta : baralho.getBaralho()) {
+        //for (Cartas carta : baralho.getBaralhoa()) {
         //    System.out.println(carta);
         //}
 

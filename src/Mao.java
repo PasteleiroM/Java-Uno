@@ -8,7 +8,7 @@ public class Mao {
         this.baralho = baralho;          //para adicionar um metodo de outra classe, faço isso para instanciar um objeto daquela classe aqui
     }
     
-    public List<Cartas> entregaMao() {  //nome do metodo de entregar cartas
+    public List<Cartas> entregaMao() {  //nome do metodao de entregar cartas
 
         List<Cartas> mao = new ArrayList<>();
         for (int i = 0; i < 7; i++) {

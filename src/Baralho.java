@@ -20,7 +20,7 @@ public class Baralho {
         return baralho;
     }
 
-    public Cartas entregador() { //serve para comnprar cartas novas também no meio do jogo
+    public Cartas entregador() { //serve para comnprar cartaas novas também no meio do jogo
         return baralho.remove(0);
     }
 

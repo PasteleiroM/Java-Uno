@@ -62,7 +62,7 @@ public class Jogo {
             //for jogadores
             //mostrar mao do jogador
             //verificar se tem jogadas validas com o metodo temJogadasValidas, retorna true ou false
-            //se tiver, pergunta qual carta quer jogar
+            //se tiver, pergunta qual carta quer jogaar
             //se nao tiver, pede para comprar carta uma vez, e se for valida, já joga, se nao for passa a vez
             //verificar se jogador tem zero cartas na mao
             // se tiver, encerrar loop com break
