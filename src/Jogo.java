@@ -50,7 +50,7 @@ public class Jogo {
             jogador.setMao(jogador.getMao());
         }
         boolean ordem = true;
-        //colocar a primeira carta na mesa usando o metodo entregador da classe baralho
+        //colocar a primeira carta na mesa usando o metodo entregador da classsse baralho
         ultimaJogada = baralho.entregador();
         System.out.println("A carta na mesa é: " + ultimaJogada);
     }
