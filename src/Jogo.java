@@ -1,12 +1,19 @@
 import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Scanner;
 
 public class Jogo {
     // adicionar baralho
+    // adicionar baralho
     private Baralho baralho;
     // lista dos jogadores
+    // lista dos jogadores
     private List<Jogador> jogadores;
+    // boolean para ordem de jogada
+    private boolean ordem; // true = horario, false = anti-horario
+    // carta que esta na mesa
     // boolean para ordem de jogada
     private boolean ordem; // true = horario, false = anti-horario
     // carta que esta na mesa
