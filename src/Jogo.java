@@ -1,7 +1,5 @@
 import java.util.ArrayList;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Scanner;
 
 public class Jogo {
@@ -15,8 +13,6 @@ public class Jogo {
     private boolean ordem; // true = horario, false = anti-horario
     // carta que esta na mesa
     // boolean para ordem de jogada
-    private boolean ordem; // true = horario, false = anti-horario
-    // carta que esta na mesa
     private Cartas ultimaJogada;
 
     public Jogo(Baralho baralho, List<Jogador> jogadores, boolean ordem, Cartas ultimaJogada) {
