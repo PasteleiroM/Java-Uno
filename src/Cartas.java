@@ -2,6 +2,9 @@ public class Cartas {
     private String color;
 
 
+    public void setColor(String color) {
+        this.color = color;
+    }
     private String value;
     
 
