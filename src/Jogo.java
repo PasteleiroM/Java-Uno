@@ -62,12 +62,20 @@ public class Jogo {
 
     // metodo para rodar o jogo com while loop
     public void rodarJogo() {
+        Boolean bloqueado = false;
         while (true) {
             // for jogadores
+
             for (int i = 0; i < jogadores.size(); i++) { // aparentemente essa forma de for é melhor para aplicar os
                                                          // mais quatro e mais dois
                 Jogador jogador = jogadores.get(i);
                 jogador.mostrarMao();
+
+                 if (bloqueado == true) {
+                    System.out.println("Você foi bloqueado, passando a vez"); //precisa considerar que nao pode bloquear a mesma pessoa que jogou a carta
+                    bloqueado = false;
+                    continue;
+                 }
 
                 if (jogador.cartasAComprar > 0) { // faz comprar se nao tem valida
                     Scanner leitor = new Scanner(System.in);
@@ -141,73 +149,72 @@ public class Jogo {
                     }
 
                 }
-            
-            for (Cartas carta : jogador.getMao()) {
-                if (carta.getColor().equalsIgnoreCase(corDesejada)
-                        && carta.getValue().equalsIgnoreCase(valorDesejado)) { // ve se a carta existe na mao
-                    cartaJogada = carta;
-                    break;
-                } else if (carta.getColor().isEmpty() && carta.getValue().equalsIgnoreCase(valorDesejado)) { // ve se a
-                                                                                                             // carta
-                                                                                                             // sem cor
-                                                                                                             // existe
-                                                                                                             // na mao
-                    cartaJogada = carta;
-                    break;
+
+                for (Cartas carta : jogador.getMao()) {
+                    if (carta.getColor().equalsIgnoreCase(corDesejada)
+                            && carta.getValue().equalsIgnoreCase(valorDesejado)) { // ve se a carta existe na mao
+                        cartaJogada = carta;
+                        break;
+                    } else if (carta.getColor().isEmpty() && carta.getValue().equalsIgnoreCase(valorDesejado)) { // ve se  carta sem cor existe na mao
+                        cartaJogada = carta;
+                        break;
+                    }
                 }
-            }
 
-            // while(cartaJogada.getColor() != ultimaJogada.getColor() ||
-            // cartaJogada.getValue() != ultimaJogada.getValue()){
 
-            // }
-            if (cartaJogada != null) {
-                jogador.getMao().remove(cartaJogada);
-                ultimaJogada = cartaJogada;
-                System.out.println("A carta na mesa é: " + ultimaJogada);
+                if (cartaJogada != null) {
+                    jogador.getMao().remove(cartaJogada);
+                    ultimaJogada = cartaJogada;
+                    System.out.println("A carta na mesa é: " + ultimaJogada);
 
-                if (ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro")) { // LOGICA DO MAIS QUATRO
-                    Scanner leitorcores = new Scanner(System.in);
-                    System.out.println("Escolha a cor da próxima carta");
-                    String novaCor = leitorcores.nextLine();
-                    ultimaJogada.setColor(novaCor);
-                    System.out.println("A cor escolhida é " + novaCor);
-                    int proximoJogador = (i + 1) % jogadores.size();
-                    Jogador proxJog = jogadores.get(proximoJogador);
-                    proxJog.cartasAComprar += 4;
-                    System.out.println(proxJog.getNome() + " vai comprar 4 cartas");
-                    /*
-                     * Scanner leitor2 = new Scanner(System.in);
-                     * System.out.println("Escolha a cor da próxima carta");
-                     */
-                    continue;
-                } else if (ultimaJogada.getValue().equalsIgnoreCase("Coringa")) {
-                    Scanner leitorcores = new Scanner(System.in);
-                    System.out.println("Escolha a cor da próxima carta");
-                    String novaCor = leitorcores.nextLine();
-                    ultimaJogada.setColor(novaCor);
-                    System.out.println("A cor escolhida é " + novaCor);
-                } else if (ultimaJogada.getValue().equalsIgnoreCase("Bloqueia")) {
-                    ordem = !ordem;
-                } else if (ultimaJogada.getValue().equalsIgnoreCase("Inverte")) {
-                    ordem = !ordem;
-                } else if (ultimaJogada.getValue().equalsIgnoreCase("Mais Dois")) {
-                    int proximoJogador = (i + 1) % jogadores.size();
-                    Jogador proxJog = jogadores.get(proximoJogador);
-                    proxJog.cartasAComprar += 2;
-                    System.out.println(proxJog.getNome() + " vai comprar 2 cartas");
+                    if (ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro")) { // LOGICA DO MAIS QUATRO
+                        Scanner leitorcores = new Scanner(System.in);
+                        System.out.println("Escolha a cor da próxima carta");
+                        String novaCor = leitorcores.nextLine();
+                        ultimaJogada.setColor(novaCor);
+                        System.out.println("A cor escolhida é " + novaCor);
+                        int proximoJogador = (i + 1) % jogadores.size();
+                        Jogador proxJog = jogadores.get(proximoJogador);
+                        proxJog.cartasAComprar += 4;
+                        System.out.println(proxJog.getNome() + " vai comprar 4 cartas");
+                        /*
+                         * Scanner leitor2 = new Scanner(System.in);
+                         * System.out.println("Escolha a cor da próxima carta");
+                         */
+                        continue;
+                    } else if (ultimaJogada.getValue().equalsIgnoreCase("Coringa")) {
+                        Scanner leitorcores = new Scanner(System.in);
+                        System.out.println("Escolha a cor da próxima carta");
+                        String novaCor = leitorcores.nextLine();
+                        ultimaJogada.setColor(novaCor);
+                        System.out.println("A cor escolhida é " + novaCor);
+                    } else if (ultimaJogada.getValue().equalsIgnoreCase("Block")) {
+                        //if (ordem == true) {
+                        //    i = (i + 1) % jogadores.size();
+                        //} else {
+                        //    i = (i - 1 + jogadores.size()) % jogadores.size();
+                        //}
+                        //System.out.println("O jogador " + jogadores.get(i).getNome() + " foi bloqueado");
+                        bloqueado = true;
+                    } else if (ultimaJogada.getValue().equalsIgnoreCase("Inverte")) {
+                        ordem = !ordem;
+                    } else if (ultimaJogada.getValue().equalsIgnoreCase("Mais Dois")) {
+                        int proximoJogador = (i + 1) % jogadores.size();
+                        Jogador proxJog = jogadores.get(proximoJogador);
+                        proxJog.cartasAComprar += 2;
+                        System.out.println(proxJog.getNome() + " vai comprar 2 cartas");
+                    }
+                } else {
+                    System.out.println("Carta inválida, escolha outra carta");
                 }
-            } else {
-                System.out.println("Carta inválida, escolha outra carta");
-            }
-            if (jogador.getMao().isEmpty()) {
-                System.out.println(jogador.getNome() + " venceu o jogo!");
-                // leitor.close();
+                if (jogador.getMao().isEmpty()) {
+                    System.out.println(jogador.getNome() + " venceu o jogo!");
+                    // leitor.close();
 
-                return;
+                    return;
+                }
             }
         }
-    }
 
     }
 
@@ -239,7 +246,7 @@ public class Jogo {
             maisQuatro(jogador);
         } else if (ultimaJogada.getValue().equals("Inverte")) {
             inverter(jogador);
-        } else if (ultimaJogada.getValue().equals("Bloqueia")) {
+        } else if (ultimaJogada.getValue().equals("Block")) { // estava "Bloqueia", mas o valor da carta é "Block"
             bloquear(jogador);
         } else if (ultimaJogada.getValue().equals("Coringa")) {
             coringa(jogador);
@@ -262,7 +269,7 @@ public class Jogo {
     }
 
     private void bloquear(Jogador jogador) {
-        if (ultimaJogada.getValue().equals("Bloqueia")) {
+        if (ultimaJogada.getValue().equals("Block")) {
 
         }
 
