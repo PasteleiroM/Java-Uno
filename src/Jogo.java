@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Jogo {
+    private String novaCor = "";
     // adicionar baralho
     // adicionar baralho
     private Baralho baralho;
@@ -63,6 +64,7 @@ public class Jogo {
     // metodo para rodar o jogo com while loop
     public void rodarJogo() {
         Boolean bloqueado = false;
+        
         while (true) {
             // for jogadores
 
@@ -138,7 +140,8 @@ public class Jogo {
 
                     // Verificar se a carta foi encontrada e é válida
                     if (cartaJogada != null &&
-                            (cartaJogada.getColor().equalsIgnoreCase(ultimaJogada.getColor()) ||
+                            (cartaJogada.getColor().equalsIgnoreCase(novaCor) ||
+                                cartaJogada.getColor().equalsIgnoreCase(ultimaJogada.getColor()) ||
                                     cartaJogada.getValue().equalsIgnoreCase(ultimaJogada.getValue()) ||
                                     cartaJogada.getValue().equalsIgnoreCase("Mais Quatro") ||
                                     cartaJogada.getValue().equalsIgnoreCase("Coringa"))) {
@@ -170,7 +173,7 @@ public class Jogo {
                     if (ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro")) { // LOGICA DO MAIS QUATRO
                         Scanner leitorcores = new Scanner(System.in);
                         System.out.println("Escolha a cor da próxima carta");
-                        String novaCor = leitorcores.nextLine();
+                        novaCor = leitorcores.nextLine();
                         ultimaJogada.setColor(novaCor);
                         System.out.println("A cor escolhida é " + novaCor);
                         int proximoJogador = (i + 1) % jogadores.size();
@@ -185,7 +188,7 @@ public class Jogo {
                     } else if (ultimaJogada.getValue().equalsIgnoreCase("Coringa")) {
                         Scanner leitorcores = new Scanner(System.in);
                         System.out.println("Escolha a cor da próxima carta");
-                        String novaCor = leitorcores.nextLine();
+                        novaCor = leitorcores.nextLine();
                         ultimaJogada.setColor(novaCor);
                         System.out.println("A cor escolhida é " + novaCor);
                     } else if (ultimaJogada.getValue().equalsIgnoreCase("Block")) {
@@ -288,7 +291,7 @@ public class Jogo {
     // metodo para verificar se jogador atual tem jogadas validas
     public boolean temJogadasValidas(Jogador jogador) {
         for (Cartas carta : jogador.getMao()) {
-            if (carta.getColor().equals(ultimaJogada.getColor()) || carta.getValue().equals(ultimaJogada.getValue())
+            if (carta.getColor().equalsIgnoreCase(novaCor) || carta.getColor().equals(ultimaJogada.getColor()) || carta.getValue().equals(ultimaJogada.getValue())
                     || carta.getValue().equals("Coringa") || carta.getValue().equals("Mais Quatro")) {
                 return true;
 
