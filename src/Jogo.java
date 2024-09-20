@@ -42,12 +42,11 @@ public class Jogo {
         int numJogadores = leitor.nextInt();
         for (int i = 0; i < numJogadores; i++) {
 
-            String nomeJogador = addJogadores(i + 1); // cria o nome
+            String nomeJogador = addJogadores(i + 1); //ria o nome
             Mao mao = new Mao(baralho);
-            Jogador jogador = new Jogador(nomeJogador, mao, false); // aqui cria o objeto jogador passando o nome que acabou de ser criado
-            jogadores.add(jogador); // manda o jogador criado no loop pra lista de jogadores.
+            Jogador jogador = new Jogador(nomeJogador, mao, false); //aqui cria o objeto jogador passando o nome que acabou de ser criado
+            jogadores.add(jogador); 
         }
-        // embaralhar o baralho
         baralho.embaralha();
         // for loop para entregar as cartas iniciais para os jogadores
         for (Jogador jogador : jogadores) {
@@ -56,7 +55,13 @@ public class Jogo {
         boolean ordem = true;
         // colocar a primeira carta na mesa usando o metodo entregador da classsse
         // baralho
+        
         ultimaJogada = baralho.entregador();
+        while(ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro") || ultimaJogada.getValue().equalsIgnoreCase("Coringa")) {
+            baralho.getBaralho().add(ultimaJogada);
+            ultimaJogada = baralho.entregador();
+            System.out.println("Acabei de evitar que a carta inicial fosse um +4 ou Coringa"); 
+        }
         System.out.println("A carta na mesa é: " + ultimaJogada);
         rodarJogo();
     }
