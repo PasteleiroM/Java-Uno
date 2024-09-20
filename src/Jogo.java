@@ -5,62 +5,56 @@ import java.util.Scanner;
 
 public class Jogo {
     private String novaCor = "";
-    // adicionar baralho
-    // adicionar baralho
     private Baralho baralho;
-    // lista dos jogadores
-    // lista dos jogadores
     private List<Jogador> jogadores;
-    // boolean para ordem de jogada
-    private boolean ordem; // true = horario, false = anti-horario
-    // carta que esta na mesa
-    // boolean para ordem de jogada
     private Cartas ultimaJogada;
 
-    public Jogo(Baralho baralho, List<Jogador> jogadores, boolean ordem, Cartas ultimaJogada) {
+    public Jogo(Baralho baralho, List<Jogador> jogadores, Cartas ultimaJogada) {
         this.baralho = baralho;
         this.jogadores = new ArrayList<>();
-        this.ordem = ordem;
         this.ultimaJogada = ultimaJogada;
     }
 
-    // metodo para add novos jogadores
     public static String addJogadores(int cont) {
-
-        Scanner leitor = new Scanner(System.in); // fechar esse leitor quando o jogo acabar
+        Scanner leitor = new Scanner(System.in); 
         System.out.println("Digite o nome do jogador " + cont);
-        String jogador = leitor.next();
+        String jogador = leitor.nextLine();
         return jogador;
 
     }
 
-    // metodo para iniciar o jogo
     public void iniciarJogo() {
-        // pergunta quantos jogadores vão jogar
         Scanner leitor = new Scanner(System.in);
         System.out.println("Quantos jogadores vão jogar?");
         int numJogadores = leitor.nextInt();
+        leitor.nextLine();
         for (int i = 0; i < numJogadores; i++) {
-
             String nomeJogador = addJogadores(i + 1); //ria o nome
             Mao mao = new Mao(baralho);
-            Jogador jogador = new Jogador(nomeJogador, mao, false); //aqui cria o objeto jogador passando o nome que acabou de ser criado
-            jogadores.add(jogador); 
+            System.out.println("Esse jogador vai ser IA? S para sim, N para não");
+            String respostaIA = leitor.nextLine();
+            if (respostaIA.equalsIgnoreCase("S")){
+            Jogador jogador = new Jogador(nomeJogador, mao, true); //aqui cria o objeto jogador passando o nome que acabou de ser criado
+            jogadores.add(jogador);
+            } else if (respostaIA.equalsIgnoreCase("N")) {
+            Jogador jogador = new Jogador(nomeJogador, mao, false); 
+            jogadores.add(jogador);
+            } else {
+                System.out.println("Digite certo porra");
+                i--;
+            }
         }
+
         baralho.embaralha();
-        // for loop para entregar as cartas iniciais para os jogadores
         for (Jogador jogador : jogadores) {
             jogador.setMao(jogador.getMao());
         }
-        boolean ordem = true;
-        // colocar a primeira carta na mesa usando o metodo entregador da classsse
-        // baralho
-        
+
         ultimaJogada = baralho.entregador();
-        while(ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro") || ultimaJogada.getValue().equalsIgnoreCase("Coringa")) {
+        while(ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro") || ultimaJogada.getValue().equalsIgnoreCase("Coringa")) { 
             baralho.getBaralho().add(ultimaJogada);
             ultimaJogada = baralho.entregador();
-            System.out.println("Acabei de evitar que a carta inicial fosse um +4 ou Coringa"); 
+            System.out.println("Ops, a carta inicial era um coringa ou mais quatro, vou trocar por outra"); 
         }
         System.out.println("A carta na mesa é: " + ultimaJogada);
         rodarJogo();
@@ -71,18 +65,14 @@ public class Jogo {
         Boolean bloqueado = false;
         
         while (true) {
-            // for jogadores
-
             for (int i = 0; i < jogadores.size(); i++) { // aparentemente essa forma de for é melhor para aplicar os mais quatro e mais dois
                 Jogador jogador = jogadores.get(i);
                 jogador.mostrarMao();
-
-                 if (bloqueado == true) {
+                if (bloqueado == true) {
                     System.out.println("Você foi bloqueado, passando a vez"); //precisa considerar que nao pode bloquear a mesma pessoa que jogou a carta
                     bloqueado = false; //reinicia o boolean
                     continue;
-                 }
-
+                }
                 if (jogador.cartasAComprar > 0) { // faz comprar se for obrigado
                     compraDeCartas(jogador);
                     continue;
@@ -102,7 +92,6 @@ public class Jogo {
                     Scanner leitor = new Scanner(System.in);
                     System.out.println("Qual carta você quer jogar?");
                     cartaDesejada = leitor.nextLine().trim();
-
                     if (cartaDesejada.equalsIgnoreCase("Mais Quatro") || cartaDesejada.equalsIgnoreCase("Coringa")) {
                         cartaJogada = encontrarCarta(jogador, cartaDesejada);
                         if (cartaJogada != null) {
@@ -178,8 +167,6 @@ public class Jogo {
     }
 
 
-
-
     public void compraDeCartas(Jogador jogador) { 
         System.out.println("Você não tem jogadas válidas, compre " + jogador.cartasAComprar + " cartas");
         Scanner leitor = new Scanner(System.in);
@@ -216,7 +203,6 @@ public class Jogo {
 
     private void inverter() {
         Collections.reverse(jogadores);
-        // logica pensar depois
     }
 
     private void coringa(Jogador jogador) {
@@ -232,7 +218,6 @@ public class Jogo {
             if (carta.getColor().equalsIgnoreCase(novaCor) || carta.getColor().equals(ultimaJogada.getColor()) || carta.getValue().equals(ultimaJogada.getValue())
                     || carta.getValue().equals("Coringa") || carta.getValue().equals("Mais Quatro")) {
                 return true;
-
             }
         }
         jogador.cartasAComprar += 1;

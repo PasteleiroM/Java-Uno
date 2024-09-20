@@ -3,6 +3,7 @@ import java.util.List;
 public class Jogador {
     public int cartasAComprar = 0;
     private List<Cartas> mao;
+    private Boolean jogadorIA;
     public List<Cartas> getMao() {
         return mao;
     }
@@ -12,7 +13,7 @@ public class Jogador {
     }
 
     private String nome;
-    //private Boolean jogadorIAa;
+
 
     public void setNome(String nome) {
         this.nome = nome;
@@ -28,7 +29,7 @@ public class Jogador {
     public Jogador(String nome, Mao mao, Boolean jogadorIA) {  //construtor para poder puxar esses atributos em outras classes, passando os atributos entre ()
         this.nome = nome;
         this.mao = mao.entregaMao();
-       // this.jogadorIA = jogadorIA;
+        this.jogadorIA = jogadorIA;
     }
     
     public String getNome() {
