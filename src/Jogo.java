@@ -8,6 +8,7 @@ public class Jogo {
     private Baralho baralho;
     private List<Jogador> jogadores;
     private Cartas ultimaJogada;
+    public Boolean bloqueado;
 
     public Jogo(Baralho baralho, List<Jogador> jogadores, Cartas ultimaJogada) {
         this.baralho = baralho;
@@ -62,17 +63,19 @@ public class Jogo {
 
     // metodo para rodar o jogo com while loop
     public void rodarJogo() {
-        Boolean bloqueado = false;
+        bloqueado = false;
         
         while (true) {
             for (int i = 0; i < jogadores.size(); i++) { // aparentemente essa forma de for é melhor para aplicar os mais quatro e mais dois
                 Jogador jogador = jogadores.get(i);
+
                 jogador.mostrarMao();
                 if (bloqueado == true) {
                     System.out.println("Você foi bloqueado, passando a vez"); //precisa considerar que nao pode bloquear a mesma pessoa que jogou a carta
                     bloqueado = false; //reinicia o boolean
                     continue;
                 }
+
                 if (jogador.cartasAComprar > 0) { // faz comprar se for obrigado
                     compraDeCartas(jogador);
                     continue;
@@ -81,7 +84,9 @@ public class Jogo {
                     compraDeCartas(jogador);
                     continue;
                 }
-
+                if (jogador.getJogadorIA()) {
+                    logicaIA(jogador, i);
+                } else {
                 Cartas cartaJogada = null;
                 String cartaDesejada = "";
                 String corDesejada = "";
@@ -157,6 +162,7 @@ public class Jogo {
                 } else {
                     System.out.println("Carta inválida, escolha outra carta");
                 }
+            }
                 if (jogador.getMao().isEmpty()) {
                     System.out.println(jogador.getNome() + " venceu o jogo!");
                     return;
@@ -168,6 +174,13 @@ public class Jogo {
 
 
     public void compraDeCartas(Jogador jogador) { 
+        if (jogador.getJogadorIA()) {
+            for (int i = 0; i < jogador.cartasAComprar; i++){
+            jogador.getMao().add(baralho.entregador());
+            System.out.println("IA comprou " + (i+1) + " cartas e agora tem " + jogador.getMao().size());
+            }
+            jogador.cartasAComprar = 0;
+        } else {
         System.out.println("Você não tem jogadas válidas, compre " + jogador.cartasAComprar + " cartas");
         Scanner leitor = new Scanner(System.in);
         while (!leitor.nextLine().equalsIgnoreCase("comprar")) {
@@ -180,6 +193,7 @@ public class Jogo {
         System.out.println("Essa é sua mão agora: ");
         jogador.mostrarMao();
     }
+    }
 
 
     private void maisDois(Jogador jogador, int i) {
@@ -190,11 +204,53 @@ public class Jogo {
     }
 
     private void maisQuatro(Jogador jogador, int i) {
+        if (jogador.getJogadorIA()) {
+            int contAzul = 0;
+            int contAmarelo = 0;
+            int contVerde = 0;
+            int contVermelho = 0;
+            int maximo = contAzul;
+            for (Cartas carta : jogador.getMao()){
+                if (carta.getColor().equals("Azul")){
+                    contAzul += 1;
+                } else if (carta.getColor().equals("Amarelo")){
+                    contAmarelo += 1;
+                } else if (carta.getColor().equals("Verde")){
+                    contVerde += 1;
+                } else if (carta.getColor().equals("Vermelho")){
+                    contVermelho += 1;
+                }            
+            }
+            if (contAmarelo > maximo) {
+                maximo = contAmarelo;
+            }
+            if (contVerde > maximo) {
+                maximo = contVerde;
+            }
+            if (contVermelho > maximo) {
+                maximo = contVermelho;
+            }
+            if (maximo == contAzul) {
+                novaCor = "Azul";
+            }
+            if (maximo == contAmarelo) {
+                novaCor = "Amarelo";
+            }
+            if (maximo == contVermelho){
+                novaCor = "Vermelho";
+            } else {
+                novaCor = "Verde";
+            }
+            
+        } else {
         Scanner leitorcores = new Scanner(System.in);
         System.out.println("Escolha a cor da próxima carta");
         novaCor = leitorcores.nextLine();
+        }
         ultimaJogada.setColor(novaCor);
+        
         System.out.println("A cor escolhida é " + novaCor);
+
         int proximoJogador = (i + 1) % jogadores.size();
         Jogador proxJog = jogadores.get(proximoJogador);
         proxJog.cartasAComprar += 4;
@@ -206,9 +262,49 @@ public class Jogo {
     }
 
     private void coringa(Jogador jogador) {
+        if (jogador.getJogadorIA()) {
+            int contAzul = 0;
+            int contAmarelo = 0;
+            int contVerde = 0;
+            int contVermelho = 0;
+            int maximo = contAzul;
+            for (Cartas carta : jogador.getMao()){
+                if (carta.getColor().equals("Azul")){
+                    contAzul += 1;
+                } else if (carta.getColor().equals("Amarelo")){
+                    contAmarelo += 1;
+                } else if (carta.getColor().equals("Verde")){
+                    contVerde += 1;
+                } else if (carta.getColor().equals("Vermelho")){
+                    contVermelho += 1;
+                }            
+            }
+            if (contAmarelo > maximo) {
+                maximo = contAmarelo;
+            }
+            if (contVerde > maximo) {
+                maximo = contVerde;
+            }
+            if (contVermelho > maximo) {
+                maximo = contVermelho;
+            }
+            if (maximo == contAzul) {
+                novaCor = "Azul";
+            }
+            if (maximo == contAmarelo) {
+                novaCor = "Amarelo";
+            }
+            if (maximo == contVermelho){
+                novaCor = "Vermelho";
+            } else {
+                novaCor = "Verde";
+            }
+            
+        } else {
         Scanner leitorcores = new Scanner(System.in);
         System.out.println("Escolha a cor da próxima carta");
         novaCor = leitorcores.nextLine();
+        }
         ultimaJogada.setColor(novaCor);
         System.out.println("A cor escolhida é " + novaCor);
     }
@@ -232,6 +328,33 @@ public class Jogo {
             }
         }
         return null;
+    }
+
+    private void logicaIA(Jogador jogador, int i){
+        System.out.println("IA tem " + jogador.getMao().size() + " cartas");
+        for (Cartas carta : jogador.getMao()) {
+            if (carta.getColor().equalsIgnoreCase(novaCor) || carta.getColor().equals(ultimaJogada.getColor()) || carta.getValue().equals(ultimaJogada.getValue())
+                    || carta.getValue().equals("Coringa") || carta.getValue().equals("Mais Quatro")) {
+                    ultimaJogada = carta;
+                    jogador.getMao().remove(ultimaJogada);
+                    System.out.println("IA jogou: " + ultimaJogada);
+                    if (ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro")) { // LOGICA DO MAIS QUATRO
+                        maisQuatro(jogador, i); 
+                        continue;
+                    } else if (ultimaJogada.getValue().equalsIgnoreCase("Coringa")) {
+                        coringa(jogador);
+                    } else if (ultimaJogada.getValue().equalsIgnoreCase("Block")) {
+                        bloqueado = true;
+                    } else if (ultimaJogada.getValue().equalsIgnoreCase("Inverte")) {
+                        inverter();
+                    } else if (ultimaJogada.getValue().equalsIgnoreCase("Mais Dois")) {
+                        maisDois(jogador, i);
+                    }
+                    break;
+
+                    }
+
+        }
     }
 
 }

@@ -4,6 +4,10 @@ public class Jogador {
     public int cartasAComprar = 0;
     private List<Cartas> mao;
     private Boolean jogadorIA;
+    public Boolean getJogadorIA() {
+        return jogadorIA;
+    }
+
     public List<Cartas> getMao() {
         return mao;
     }
