@@ -332,6 +332,7 @@ public class Jogo {
 
     private void logicaIA(Jogador jogador, int i){
         System.out.println("IA tem " + jogador.getMao().size() + " cartas");
+        Boolean jogouMaisQuatro = false;
         for (Cartas carta : jogador.getMao()) {
             if (carta.getColor().equalsIgnoreCase(novaCor) || carta.getColor().equals(ultimaJogada.getColor()) || carta.getValue().equals(ultimaJogada.getValue())
                     || carta.getValue().equals("Coringa") || carta.getValue().equals("Mais Quatro")) {
@@ -339,8 +340,9 @@ public class Jogo {
                     jogador.getMao().remove(ultimaJogada);
                     System.out.println("IA jogou: " + ultimaJogada);
                     if (ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro")) { // LOGICA DO MAIS QUATRO
-                        maisQuatro(jogador, i); 
-                        continue;
+                        //maisQuatro(jogador, i); 
+                        jogouMaisQuatro = true;
+                        break;
                     } else if (ultimaJogada.getValue().equalsIgnoreCase("Coringa")) {
                         coringa(jogador);
                     } else if (ultimaJogada.getValue().equalsIgnoreCase("Block")) {
@@ -354,6 +356,9 @@ public class Jogo {
 
                     }
 
+        }
+        if (jogouMaisQuatro) {
+            maisQuatro(jogador, i);
         }
     }
 

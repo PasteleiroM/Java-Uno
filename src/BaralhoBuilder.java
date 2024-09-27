@@ -10,19 +10,21 @@ public class BaralhoBuilder {
    
         List<Cartas> baralho = new ArrayList<>(); 
    
-       for (String cor : cores) {
-           for (String valor : valores) {
-               baralho.add(new Cartas(cor, valor));
-               if (valor != "Zero") {
-                   baralho.add(new Cartas(cor, valor));
-               }
-           }
-       }
-       for (String especial : especiais) {
-           for (int i = 0; i < 4; i++) {
-               baralho.add(new Cartas("", especial)); // especiala não tem cor
-           }
-       }
-       return baralho;
-   }
+        for (String cor : cores) {
+            for (String valor : valores) {
+                String caminho = "cards/" + cor + "/" + valor + ".png";
+                baralho.add(new Cartas(cor, valor, caminho));
+                if (valor != "Zero") {
+                    baralho.add(new Cartas(cor, valor, caminho));
+                }
+            }
+        }
+        for (String especial : especiais) {
+            String caminho = "cards/coringa/" + especial + ".png"; 
+            for (int i = 0; i < 4; i++) {
+                baralho.add(new Cartas("", especial, caminho)); // especiala não tem cor
+            }
+        }
+        return baralho;
+    }
 }
