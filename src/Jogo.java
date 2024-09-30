@@ -75,12 +75,13 @@ public class Jogo {
 
         while (true) {
             for (i = 0; i < jogadores.size(); i++) { // aparentemente essa forma de for é melhor para aplicar os mais quatro e mais dois
-                System.out.print("\033[H\033[2J");
-                System.out.flush();
+
                 System.out.println("A carta na mesa é: " + ultimaJogada);
                 Jogador jogador = jogadores.get(i);
-
+                System.out.println("É a vez de " + jogador.getNome());
+                if (!jogador.getJogadorIA()){
                 jogador.mostrarMao();
+                }
                 if (bloqueado == true) {
                     System.out.println("Você foi bloqueado, passando a vez"); // precisa considerar que nao pode bloquear a mesma pessoa que jogou a carta
                     bloqueado = false; // reinicia o boolean
@@ -343,7 +344,7 @@ public class Jogo {
                     if (cartaJogada != null) {
                         jogador.getMao().remove(cartaJogada);
                         ultimaJogada = cartaJogada;
-                        System.out.println("A carta na mesa é: " + ultimaJogada);
+                        System.out.println(jogador.getNome() + " jogou " + ultimaJogada);
 
                         if (ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro")) { // LOGICA DO MAIS QUATRO
                             maisQuatro(jogador, i);
