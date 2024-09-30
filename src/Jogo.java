@@ -378,7 +378,38 @@ public class Jogo {
         scanner.nextLine();
         // se outros jogadores tem menos cartas, verificar se tem especiais primeiro
         
-            
+        for (Cartas carta : jogador.getMao()) {
+            if (jogou) {
+                break;
+            }
+            if ((carta.getColor().equalsIgnoreCase(ultimaJogada.getColor()) && 
+             (carta.getValue().equalsIgnoreCase("Mais Dois") || 
+              carta.getValue().equalsIgnoreCase("Inverte") || 
+              carta.getValue().equalsIgnoreCase("Block"))) ||
+            carta.getValue().equalsIgnoreCase("Mais Quatro")) {
+
+            cartaParaRemover = carta;
+            ultimaJogada = carta;
+            jogou = true;
+
+            if (carta.getValue().equalsIgnoreCase("Mais Quatro")) {
+                jogouMaisQuatro = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Coringa")) {
+                jogouCoringa = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Block")) {
+                jogouBloqueado = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Inverte")) {
+                inverter();
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Mais Dois")) {
+                jogouMaisDois = true;
+                break;
+            }
+            }
+        } 
         
 
         for (Cartas carta : jogador.getMao()) {
@@ -413,7 +444,7 @@ public class Jogo {
             }
         }
 
-        // Se não for uma carta especial, verifica se é válida pela cor ou valor
+        
         else if (carta.getColor().equals(ultimaJogada.getColor()) || 
                  carta.getValue().equals(ultimaJogada.getValue()) || 
                  carta.getValue().equals("Coringa")) {
