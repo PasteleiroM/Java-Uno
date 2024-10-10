@@ -79,9 +79,9 @@ public class Jogo {
                 System.out.println("A carta na mesa é: " + ultimaJogada);
                 Jogador jogador = jogadores.get(i);
                 System.out.println("É a vez de " + jogador.getNome());
-                if (!jogador.getJogadorIA()){
+                //if (!jogador.getJogadorIA()){
                 jogador.mostrarMao();
-                }
+                //}
                 if (bloqueado == true) {
                     System.out.println("Você foi bloqueado, passando a vez"); // precisa considerar que nao pode bloquear a mesma pessoa que jogou a carta
                     bloqueado = false; // reinicia o boolean
@@ -373,9 +373,9 @@ public class Jogo {
         Boolean jogouMaisDois = false;
         Boolean jogouCoringa = false;
         
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Pressione Enter para a IA jogar...");
-        scanner.nextLine();
+        //Scanner scanner = new Scanner(System.in);
+        //System.out.println("Pressione Enter para a IA jogar...");
+        //scanner.nextLine();
         // se outros jogadores tem menos cartas, verificar se tem especiais primeiro
         
         for (Cartas carta : jogador.getMao()) {
