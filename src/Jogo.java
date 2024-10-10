@@ -1,276 +1,496 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Jogo {
-    // adicionar baralho
-    // adicionar baralho
+    private String novaCor = "";
     private Baralho baralho;
-    // lista dos jogadores
-    // lista dos jogadores
     private List<Jogador> jogadores;
-    // boolean para ordem de jogada
-    private boolean ordem; // true = horario, false = anti-horario
-    // carta que esta na mesa
-    // boolean para ordem de jogada
     private Cartas ultimaJogada;
+    public Boolean bloqueado;
+    public Boolean gritouUno;
 
-    public Jogo(Baralho baralho, List<Jogador> jogadores, boolean ordem, Cartas ultimaJogada) {
+    private int i;
+
+    public Jogo(Baralho baralho, List<Jogador> jogadores, Cartas ultimaJogada) {
         this.baralho = baralho;
         this.jogadores = new ArrayList<>();
-        this.ordem = ordem;
         this.ultimaJogada = ultimaJogada;
     }
 
-    // metodo para add novos jogadores
     public static String addJogadores(int cont) {
-        
-        Scanner leitor = new Scanner(System.in); // fechar esse leitor quando o jogo acabar
+        Scanner leitor = new Scanner(System.in);
         System.out.println("Digite o nome do jogador " + cont);
-        String jogador = leitor.next();
+        String jogador = leitor.nextLine();
         return jogador;
 
     }
-    
-    // metodo para iniciar o jogo
+
     public void iniciarJogo() {
-        //pergunta quantos jogadores vão jogar
         Scanner leitor = new Scanner(System.in);
         System.out.println("Quantos jogadores vão jogar?");
         int numJogadores = leitor.nextInt();
-        for (int i = 0; i < numJogadores; i ++) {
-
-
-            String nomeJogador = addJogadores(i +1); //cria o nome
+        leitor.nextLine();
+        for (int i = 0; i < numJogadores; i++) {
+            String nomeJogador = addJogadores(i + 1); // ria o nome
             Mao mao = new Mao(baralho);
-            Jogador jogador = new Jogador(nomeJogador, mao, false); //aqui cria o objeto jogador passando o nomeque acabou de ser criado
-            jogadores.add(jogador); //manda o jogador criado no loop pra lista de jogadores.
+            System.out.println("Esse jogador vai ser IA? S para sim, N para não");
+            String respostaIA = leitor.nextLine();
+            if (respostaIA.equalsIgnoreCase("S")) {
+                Jogador jogador = new Jogador(nomeJogador, mao, true); // aqui cria o objeto jogador passando o nome que
+                                                                       // acabou de ser criado
+                jogadores.add(jogador);
+            } else if (respostaIA.equalsIgnoreCase("N")) {
+                Jogador jogador = new Jogador(nomeJogador, mao, false);
+                jogadores.add(jogador);
+            } else {
+                System.out.println("Digite certo porra");
+                i--;
+            }
         }
-        //embaralhar o baralho
+
         baralho.embaralha();
-        //for loop para entregar as cartas iniciais para os jogadores
         for (Jogador jogador : jogadores) {
             jogador.setMao(jogador.getMao());
         }
-        boolean ordem = true;
-        //colocar a primeira carta na mesa usando o metodo entregador da classsse baralho
+
         ultimaJogada = baralho.entregador();
+        while (ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro")
+                || ultimaJogada.getValue().equalsIgnoreCase("Coringa")) {
+            baralho.getBaralho().add(ultimaJogada);
+            ultimaJogada = baralho.entregador();
+            System.out.println("Ops, a carta inicial era um coringa ou mais quatro, vou trocar por outra");
+        }
         System.out.println("A carta na mesa é: " + ultimaJogada);
         rodarJogo();
     }
-    
-    
+
     // metodo para rodar o jogo com while loop
-    public void rodarJogo(){
-        while(true){
-            //for jogadores
-            for (int i = 0; i < jogadores.size(); i++){ //aparentemente essa forma de for é melhor para aplicar os mais quatro e mais dois
+    public void rodarJogo() {
+        bloqueado = false;
+
+        while (true) {
+            for (i = 0; i < jogadores.size(); i++) { // aparentemente essa forma de for é melhor para aplicar os mais quatro e mais dois
+
+                System.out.println("A carta na mesa é: " + ultimaJogada);
                 Jogador jogador = jogadores.get(i);
+                System.out.println("É a vez de " + jogador.getNome());
+                //if (!jogador.getJogadorIA()){
                 jogador.mostrarMao();
-
-
-                if (jogador.cartasAComprar > 0){         //faz comprar se nao tem valida
-                    Scanner leitor = new Scanner(System.in);
-                    System.out.println("Você não tem jogadas válidas, compre " + jogador.cartasAComprar + " cartas");
-                    while (!leitor.nextLine().equalsIgnoreCase("comprar")) {
-                            System.out.println("Digite 'comprar' meu deus cara burro");
-                        } 
-                    compraDeCartas(jogador);
-                    System.out.println("Essa é sua mão agora: ");
-                    jogador.mostrarMao();  
-                    continue; 
-                }
-                if (temJogadasValidas(jogador) == false){
-                 
-                    System.out.println("Você não tem cartas validas, compre uma digitando 'comprar'");
-
-                    Scanner leitor = new Scanner(System.in);
-                    while (!leitor.nextLine().equalsIgnoreCase("comprar")) {
-                        System.out.println("Digite 'comprar' meu deus cara burro");
-                    }
-                    compraDeCartas(jogador);
-                    System.out.println("Essa é sua mão agora: ");
-                    jogador.mostrarMao();
+                //}
+                if (bloqueado == true) {
+                    System.out.println("Você foi bloqueado, passando a vez"); // precisa considerar que nao pode bloquear a mesma pessoa que jogou a carta
+                    bloqueado = false; // reinicia o boolean
                     continue;
                 }
 
-
-                
-            Cartas cartaJogada = null;
-            while(cartaJogada == null){
-                Scanner leitor = new Scanner(System.in);
-                System.out.println("Qual carta você quer jogar?");
-                String cartaDesejada = leitor.nextLine().trim();
-                String corDesejada = "";
-                String valorDesejado = cartaDesejada;
-                
-                
-                
-                if (cartaDesejada.equalsIgnoreCase("Mais Quatro") || cartaDesejada.equalsIgnoreCase("Coringa")){
-                    for (Cartas carta : jogador.getMao()){
-                        if (carta.getValue().equalsIgnoreCase(cartaDesejada)){
-                            cartaJogada = carta;
-                            break;
-                        } 
-
-                    }
+                if (jogador.cartasAComprar > 0) { // faz comprar se for obrigado
+                    compraDeCartas(jogador);
+                    continue;
+                }
+                if (temJogadasValidas(jogador) == false) { // faz comprar se nao tiver jogadas validas, nessa ordem pois
+                                                           // se ele comprar uma valida por obrigacao (+2 ou +4) ele nao
+                                                           // deve comprar mais
+                    compraDeCartas(jogador);
+                    continue;
+                }
+                if (jogador.getJogadorIA()) {
+                    logicaIA(jogador, i);
                 } else {
-                    String[] partes = cartaDesejada.split(" ");  //divide a carta em cor e valor
-                        if (partes.length == 2) {
-                        corDesejada = partes[0];
-                        valorDesejado = partes[1];
-                    } else if (partes.length == 3) {
-                        corDesejada = partes[0];
-                        valorDesejado = partes[1] + " " + partes[2];
-                    } else {
-                        System.out.println("Formato inválido, digita certo porra");
-                        continue;
-                    }
-                }
-                
-                for (Cartas carta : jogador.getMao()){
-                    if (carta.getColor().equalsIgnoreCase(corDesejada) && carta.getValue().equalsIgnoreCase(valorDesejado)){  //ve se a carta existe na mao
-                        cartaJogada = carta;
-                        break;
-                    } else if (carta.getColor().isEmpty() && carta.getValue().equalsIgnoreCase(valorDesejado)){  //ve se a carta sem cor existe na mao
-                        cartaJogada = carta;
-                        break;
-                    }
-                }
-            }
-            while(cartaJogada.getColor() != ultimaJogada.getColor() || cartaJogada.getValue() != ultimaJogada.getValue()){
-                System.out.println("Escolhe uma carta que combina meu deus");
-                break;
-            }
-                if (cartaJogada != null){
-                    jogador.getMao().remove(cartaJogada);
-                    ultimaJogada = cartaJogada;
-                    System.out.println("A carta na mesa é: " + ultimaJogada);
+                    logicaHumana(jogador, i);
 
-                    if(ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro")) { //LOGICA DO MAIS QUATRO
-                        Scanner leitorcores = new Scanner(System.in);
-                        System.out.println("Escolha a cor da próxima carta");
-                        String novaCor = leitorcores.nextLine();
-                        ultimaJogada.setColor(novaCor);
-                        System.out.println("A cor escolhida é " + novaCor);
-                        int proximoJogador = (i + 1) % jogadores.size();
-                        Jogador proxJog = jogadores.get(proximoJogador);
-                        proxJog.cartasAComprar += 4;
-                        System.out.println(proxJog.getNome() + " vai comprar 4 cartas");
-                       /* Scanner leitor2 = new Scanner(System.in);
-                        System.out.println("Escolha a cor da próxima carta"); */
-                        continue;
-                    } else if (ultimaJogada.getValue().equalsIgnoreCase("Coringa")){
-                        Scanner leitorcores = new Scanner(System.in);
-                        System.out.println("Escolha a cor da próxima carta");
-                        String novaCor = leitorcores.nextLine();
-                        ultimaJogada.setColor(novaCor);
-                        System.out.println("A cor escolhida é " + novaCor);
-                    } else if(ultimaJogada.getValue().equalsIgnoreCase("Bloqueia")){
-                        ordem = !ordem;
-                    } else if(ultimaJogada.getValue().equalsIgnoreCase("Inverte")){
-                        ordem = !ordem;
-                    } else if(ultimaJogada.getValue().equalsIgnoreCase("Mais Dois")){
-                        int proximoJogador = (i + 1) % jogadores.size();
-                        Jogador proxJog = jogadores.get(proximoJogador);
-                        proxJog.cartasAComprar += 2;
-                        System.out.println(proxJog.getNome() + " vai comprar 2 cartas");
-                    }
-                } else {
-                    System.out.println("Carta inválida, escolha outra carta");
                 }
-                if (jogador.getMao().isEmpty()){
-                    System.out.println(jogador.getNome() + " venceu o jogo!");
-                    //leitor.close();
                     
+                if (jogador.getMao().isEmpty()) {
+                    System.out.println(jogador.getNome() + " venceu o jogo!");
                     return;
                 }
             }
         }
-    }
-            //mostrar mao do jogador
-            //verificar se tem jogadas validas com o metodo temJogadasValidas, retorna true ou false
-            //se tiver, pergunta qual carta quer jogaar
-            //se nao tiver, pede para comprar carta uma vez, e se for valida, já joga, se nao for passa a vez
-            //verificar se jogador tem zero cartas na mao
-            // se tiver, encerrar loop com break
-        
-    
-
-
-    public void compraDeCartas(Jogador jogador){ //botar o codigo que esta no metodo rodarjogo aqui para controlar melhor o que acontece
-        for (int i = 0; i < jogador.cartasAComprar; i++){
-            jogador.getMao().add(baralho.entregador());
-        }
-        jogador.cartasAComprar = 0;
-        
 
     }
-    //metodo para verificar se ultima carta jogada é especial e implementar acao dela
-    public void ultimaJogadaEspecial(Cartas ultimaJogada, Jogador jogador){
-        //verifica +2 chama acao
-        if (ultimaJogada.getValue().equals("Mais Dois")){
-            maisDois(jogador);
-        } else if (ultimaJogada.getValue().equals("Mais Quatro")){
-            maisQuatro(jogador);
-        } else if (ultimaJogada.getValue().equals("Inverte")){
-            inverter(jogador);
-        } else if (ultimaJogada.getValue().equals("Bloqueia")){
-            bloquear(jogador);
-        } else if (ultimaJogada.getValue().equals("Coringa")){
-            coringa(jogador);
+
+
+    public void compraDeCartas(Jogador jogador) {
+        if (jogador.getJogadorIA()) {
+            for (int i = 0; i < jogador.cartasAComprar; i++) {
+                jogador.getMao().add(baralho.entregador());
+                System.out.println("IA comprou " + (i + 1) + " cartas e agora tem " + jogador.getMao().size());
+            }
+            jogador.cartasAComprar = 0;
+        } else {
+            System.out.println("Você não tem jogadas válidas, compre " + jogador.cartasAComprar + " cartas");
+            Scanner leitor = new Scanner(System.in);
+            while (!leitor.nextLine().equalsIgnoreCase("comprar")) {
+                System.out.println("Digite 'comprar' meu deus cara burro");
+            }
+            for (int i = 0; i < jogador.cartasAComprar; i++) {
+                jogador.getMao().add(baralho.entregador());
+            }
+            jogador.cartasAComprar = 0;
+            System.out.println("Essa é sua mão agora: ");
+            jogador.mostrarMao();
         }
     }
 
-    private void maisDois(Jogador jogador){
-        jogador.cartasAComprar += 2;
-        //logica pensar depois
+    private void maisDois(Jogador jogador, int i) {
+        int proximoJogador = (i + 1) % jogadores.size();
+        Jogador proxJog = jogadores.get(proximoJogador);
+        proxJog.cartasAComprar += 2;
+        System.out.println(proxJog.getNome() + " vai comprar 2 cartas");
     }
 
-    private void maisQuatro(Jogador jogador){
-        jogador.cartasAComprar += 4;
-        //logica pensar depois
-    }
+    private void maisQuatro(Jogador jogador, int i) {
+        if (jogador.getJogadorIA()) {
+            int contAzul = 0;
+            int contAmarelo = 0;
+            int contVerde = 0;
+            int contVermelho = 0;
+            int maximo = contAzul;
+            for (Cartas carta : jogador.getMao()) {
+                if (carta.getColor().equals("Azul")) {
+                    contAzul += 1;
+                } else if (carta.getColor().equals("Amarelo")) {
+                    contAmarelo += 1;
+                } else if (carta.getColor().equals("Verde")) {
+                    contVerde += 1;
+                } else if (carta.getColor().equals("Vermelho")) {
+                    contVermelho += 1;
+                }
+            }
+            if (contAmarelo > maximo) {
+                maximo = contAmarelo;
+            }
+            if (contVerde > maximo) {
+                maximo = contVerde;
+            }
+            if (contVermelho > maximo) {
+                maximo = contVermelho;
+            }
+            if (maximo == contAzul) {
+                novaCor = "Azul";
+            }
+            if (maximo == contAmarelo) {
+                novaCor = "Amarelo";
+            }
+            if (maximo == contVermelho) {
+                novaCor = "Vermelho";
+            } 
+            if (maximo == contVerde) {
+                novaCor = "Verde";
+            }
 
-    private void inverter(Jogador jogador){
-        ordem = !ordem;
-        //logica pensar depois
-    }
-
-    private void bloquear(Jogador jogador){
-        if (ultimaJogada.getValue().equals("Bloqueia")){
-            
+        } else {
+            Scanner leitorcores = new Scanner(System.in);
+            System.out.println("Escolha a cor da próxima carta");
+            novaCor = leitorcores.nextLine();
         }
-        
-        //hardset cartas validas para zero é uma boa ideia para implementar isso???
-        //vejo depois que fizer o verificador de jogadas validas
+        ultimaJogada.setColor(novaCor);
+
+        System.out.println("A cor escolhida é " + novaCor);
+
+        int proximoJogador = (i + 1) % jogadores.size();
+        Jogador proxJog = jogadores.get(proximoJogador);
+        proxJog.cartasAComprar += 4;
+        System.out.println(proxJog.getNome() + " vai comprar 4 cartas");
     }
 
-    private void coringa(Jogador jogador){
-        //logica pensar depois
-        //print opcoes de cor e peditr para escolher com input
-        //verificar se a cor escolhida é valida
-        //colocar uma carta invisivel na mesa com a cor escolhida mas valor vazio para o verificador de jogadas validas aceitar
+    private void inverter() {
+        Collections.reverse(jogadores);
+        i = jogadores.size() - i - 1;
+        System.out.println("O jogo foi invertido");
     }
-    
-   
 
+    private void coringa(Jogador jogador) {
+        if (jogador.getJogadorIA()) {
+            int contAzul = 0;
+            int contAmarelo = 0;
+            int contVerde = 0;
+            int contVermelho = 0;
+            int maximo = contAzul;
+            for (Cartas carta : jogador.getMao()) {
+                if (carta.getColor().equals("Azul")) {
+                    contAzul += 1;
+                } else if (carta.getColor().equals("Amarelo")) {
+                    contAmarelo += 1;
+                } else if (carta.getColor().equals("Verde")) {
+                    contVerde += 1;
+                } else if (carta.getColor().equals("Vermelho")) {
+                    contVermelho += 1;
+                }
+            }
+            if (contAmarelo > maximo) {
+                maximo = contAmarelo;
+            }
+            if (contVerde > maximo) {
+                maximo = contVerde;
+            }
+            if (contVermelho > maximo) {
+                maximo = contVermelho;
+            }
+            if (maximo == contAzul) {
+                novaCor = "Azul";
+            }
+            if (maximo == contAmarelo) {
+                novaCor = "Amarelo";
+            }
+            if (maximo == contVermelho) {
+                novaCor = "Vermelho";
+            } else {
+                novaCor = "Verde";
+            }
 
-    // metodo para verificar se jogador atual tem jogadas validas
-    public boolean temJogadasValidas(Jogador jogador){
+        } else {
+            Scanner leitorcores = new Scanner(System.in);
+            System.out.println("Escolha a cor da próxima carta");
+            novaCor = leitorcores.nextLine();
+        }
+        ultimaJogada.setColor(novaCor);
+        System.out.println("A cor escolhida é " + novaCor);
+    }
+
+    public boolean temJogadasValidas(Jogador jogador) {
         for (Cartas carta : jogador.getMao()) {
-            if (carta.getColor().equals(ultimaJogada.getColor()) || carta.getValue().equals(ultimaJogada.getValue()) || carta.getValue().equals("Coringa") || carta.getValue().equals("Mais Quatro")){
+            if (carta.getColor().equals(ultimaJogada.getColor())
+                    || carta.getValue().equals(ultimaJogada.getValue())
+                    || carta.getValue().equals("Coringa") || carta.getValue().equals("Mais Quatro")) {
                 return true;
-                
             }
         }
-        //verifica se na mao tem carta com a cor da ultima jogada
-        //verifica se na mao tem carta com o mesmo valor da ultima jogada
-        //verifica se na mao tem carta especial
-        //se tiver, retorna true
-        //se nao tiver, retorna false
         jogador.cartasAComprar += 1;
         return false;
+    }
+
+    private Cartas encontrarCarta(Jogador jogador, String cartaDesejada) {
+        for (Cartas carta : jogador.getMao()) {
+            if (carta.getValue().equalsIgnoreCase(cartaDesejada)
+                    || (carta.getColor() + " " + carta.getValue()).equalsIgnoreCase(cartaDesejada)) {
+                return carta;
+            }
+        }
+        return null;
+    }
+
+
+    private void logicaHumana(Jogador jogador, int i){
+        Cartas cartaJogada = null;
+                    String cartaDesejada = "";
+                    String corDesejada = "";
+                    String valorDesejado = "";
+
+                    while (cartaJogada == null || (!cartaJogada.getColor().equals(ultimaJogada.getColor()) &&
+                            !cartaJogada.getValue().equals(ultimaJogada.getValue()))) {
+                        Scanner leitor = new Scanner(System.in);
+                        System.out.println("Qual carta você quer jogar?");
+                        cartaDesejada = leitor.nextLine().trim();
+                        if (cartaDesejada.equalsIgnoreCase("Mais Quatro")
+                                || cartaDesejada.equalsIgnoreCase("Coringa")) {
+                            cartaJogada = encontrarCarta(jogador, cartaDesejada);
+                            if (cartaJogada != null) {
+                                break;
+                            }
+                        }
+
+                        String[] partes = cartaDesejada.split(" "); // divide a carta em cor e valor
+                        if (partes.length == 2) {
+                            corDesejada = partes[0];
+                            valorDesejado = partes[1];
+                        } else if (partes.length == 3) {
+                            corDesejada = partes[0];
+                            valorDesejado = partes[1] + " " + partes[2];
+                        } else {
+                            System.out.println("Formato inválido, digita certo porra");
+                            continue;
+                        }
+
+                        cartaJogada = encontrarCarta(jogador, corDesejada + " " + valorDesejado); // verifica se a carta
+                                                                                                  // digitada existe na
+                                                                                                  // mao
+                        if (cartaJogada != null &&
+                                (cartaJogada.getColor().equalsIgnoreCase(ultimaJogada.getColor()) ||
+                                        cartaJogada.getValue().equalsIgnoreCase(ultimaJogada.getValue()) ||
+                                        cartaJogada.getValue().equalsIgnoreCase("Mais Quatro") ||
+                                        cartaJogada.getValue().equalsIgnoreCase("Coringa"))) {
+                            break;
+                        } else {
+                            System.out.println("Carta inválida, escolha outra.");
+                            cartaJogada = null; // Reseta para que o loop continue pedindo uma carta válida
+                        }
+
+                    }
+
+                    for (Cartas carta : jogador.getMao()) {
+                        if (carta.getColor().equalsIgnoreCase(corDesejada)
+                                && carta.getValue().equalsIgnoreCase(valorDesejado)) { // ve se a carta existe na mao
+                            cartaJogada = carta;
+                            break;
+                        } else if (carta.getColor().isEmpty() && carta.getValue().equalsIgnoreCase(valorDesejado)) { // ve
+                                                                                                                     // se
+                                                                                                                     // carta
+                                                                                                                     // sem
+                                                                                                                     // cor
+                                                                                                                     // existe
+                                                                                                                     // na
+                                                                                                                     // mao
+                            cartaJogada = carta;
+                            break;
+                        }
+                    }
+
+                    if (cartaJogada != null) {
+                        jogador.getMao().remove(cartaJogada);
+                        ultimaJogada = cartaJogada;
+                        System.out.println(jogador.getNome() + " jogou " + ultimaJogada);
+
+                        if (ultimaJogada.getValue().equalsIgnoreCase("Mais Quatro")) { // LOGICA DO MAIS QUATRO
+                            maisQuatro(jogador, i);
+                            
+                        } else if (ultimaJogada.getValue().equalsIgnoreCase("Coringa")) {
+                            coringa(jogador);
+                        } else if (ultimaJogada.getValue().equalsIgnoreCase("Block")) {
+                            bloqueado = true;
+                        } else if (ultimaJogada.getValue().equalsIgnoreCase("Inverte")) {
+                            inverter();
+                            
+                        } else if (ultimaJogada.getValue().equalsIgnoreCase("Mais Dois")) {
+                            maisDois(jogador, i);
+                        }
+                    } else {
+                        System.out.println("Carta inválida, escolha outra carta");
+                    }
+                
+    }
+    private void logicaIA(Jogador jogador, int i) {
+        System.out.println("IA tem " + jogador.getMao().size() + " cartas");
+        Boolean jogouMaisQuatro = false;
+        Boolean jogou = false;
+        Boolean jogouBloqueado = false;
+        Cartas cartaParaRemover = null;
+        Boolean jogouMaisDois = false;
+        Boolean jogouCoringa = false;
+        
+        //Scanner scanner = new Scanner(System.in);
+        //System.out.println("Pressione Enter para a IA jogar...");
+        //scanner.nextLine();
+        // se outros jogadores tem menos cartas, verificar se tem especiais primeiro
+        
+        for (Cartas carta : jogador.getMao()) {
+            if (jogou) {
+                break;
+            }
+            if ((carta.getColor().equalsIgnoreCase(ultimaJogada.getColor()) && 
+             (carta.getValue().equalsIgnoreCase("Mais Dois") || 
+              carta.getValue().equalsIgnoreCase("Inverte") || 
+              carta.getValue().equalsIgnoreCase("Block"))) ||
+            carta.getValue().equalsIgnoreCase("Mais Quatro")) {
+
+            cartaParaRemover = carta;
+            ultimaJogada = carta;
+            jogou = true;
+
+            if (carta.getValue().equalsIgnoreCase("Mais Quatro")) {
+                jogouMaisQuatro = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Coringa")) {
+                jogouCoringa = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Block")) {
+                jogouBloqueado = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Inverte")) {
+                inverter();
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Mais Dois")) {
+                jogouMaisDois = true;
+                break;
+            }
+            }
+        } 
+        
+
+        for (Cartas carta : jogador.getMao()) {
+            if (jogou) {
+                break;
+            }
+            if ((carta.getColor().equalsIgnoreCase(ultimaJogada.getColor()) && 
+             (carta.getValue().equalsIgnoreCase("Mais Dois") || 
+              carta.getValue().equalsIgnoreCase("Inverte") || 
+              carta.getValue().equalsIgnoreCase("Block"))) ||
+            carta.getValue().equalsIgnoreCase("Mais Quatro")) {
+
+            cartaParaRemover = carta;
+            ultimaJogada = carta;
+            jogou = true;
+
+            if (carta.getValue().equalsIgnoreCase("Mais Quatro")) {
+                jogouMaisQuatro = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Coringa")) {
+                jogouCoringa = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Block")) {
+                jogouBloqueado = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Inverte")) {
+                inverter();
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Mais Dois")) {
+                jogouMaisDois = true;
+                break;
+            }
+        }
+
+        
+        else if (carta.getColor().equals(ultimaJogada.getColor()) || 
+                 carta.getValue().equals(ultimaJogada.getValue()) || 
+                 carta.getValue().equals("Coringa")) {
+
+            cartaParaRemover = carta;
+            ultimaJogada = carta;
+            jogou = true;
+
+            if (carta.getValue().equalsIgnoreCase("Mais Quatro")) {
+                jogouMaisQuatro = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Coringa")) {
+                jogouCoringa = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Block")) {
+                jogouBloqueado = true;
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Inverte")) {
+                inverter();
+                break;
+            } else if (carta.getValue().equalsIgnoreCase("Mais Dois")) {
+                jogouMaisDois = true;
+                break;
+                }
+            }
+
+        }
+        if (cartaParaRemover != null) {
+            jogador.getMao().remove(cartaParaRemover); // Remoção fora do loop
+            System.out.println(jogador.getNome() + " jogou: " + ultimaJogada);
+        }
+        if (jogouBloqueado) {
+            bloqueado = true;
+        }
+
+        if (jogouCoringa) {
+            coringa(jogador);
+        }
+        if (jogouMaisQuatro) {
+            maisQuatro(jogador, i);
+            jogouMaisQuatro = false;
+        }
+        if (jogouMaisDois) {
+            maisDois(jogador, i);
+            jogouMaisDois = false;
+        }
     }
 
 }
